@@ -1,5 +1,5 @@
 # set base image
-FROM tensorflow/tensorflow:2.2.0
+FROM tensorflow/tensorflow:2.3.0
 
 #RUN apt-get update && apt-get install --no-recommands -y \
 #   package-to-install \
