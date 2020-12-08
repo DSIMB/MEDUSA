@@ -44,7 +44,7 @@ $ cd medusa
 
 ### Build and run the Docker container
 
-The container is based on the image [tensorflow/tensorflow:2.2.0](https://hub.docker.com/layers/tensorflow/tensorflow/2.2.0/images/sha256-08901711826b185136886c7b8271b9fdbe86b8ccb598669781a1f5cb340184eb?context=explore)
+The container is based on the image [tensorflow/tensorflow:2.3.0](https://hub.docker.com/layers/tensorflow/tensorflow/2.3.0/images/sha256-7bc36fe0ca1a051a808122e87f5438614b371263515df4794abef9a78440af8b?context=explore)
 
 ```bash
 # Build the container and name (tag) it conveniently: medusa
