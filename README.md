@@ -44,11 +44,13 @@ $ cd medusa
 
 ### Build and run the Docker container
 
+The container is based on the image [tensorflow/tensorflow:2.2.0](https://hub.docker.com/layers/tensorflow/tensorflow/2.2.0/images/sha256-08901711826b185136886c7b8271b9fdbe86b8ccb598669781a1f5cb340184eb?context=explore)
+
 ```bash
 # Build the container and name (tag) it conveniently: medusa
 $ docker build -t medusa .
 # Run it. Change paths and names accordingly
-$ docker run -it \
+$ docker run -it --rm \
     --user "$(id -u):$(id -g)" \ # Launch docker as user's id
     -v /path/to/database:/database:ro \ # Bind mount as read-only the database for HHblits
     -v $(pwd):/project \ # Bind mount the project's folder
