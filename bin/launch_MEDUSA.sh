@@ -29,13 +29,6 @@ elif [[ "$OSTYPE" == "cygwin" ]]; then
 fi
 
 # Parse command line arguments
-if [[ $# -ne 6 && $1 != "-h" && $1 != "--help" ]]; then
-	if [[ $# -ne 8 || $# -ne 10 &&  ]]
-    printf "\n\nPlease provide all 3 required arguments.\n\n"
-    usage
-    exit
-fi
-
 while [ "$1" != "" ]; do
     case $1 in
         -i | --seq )
