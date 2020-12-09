@@ -4,19 +4,33 @@
 usage() {
 cat << EOF
 Usage:
-        -i    | --seq         (Required)     Input Fasta sequence (file)
+        -i    | --seq         (Required)     Path to input Fasta sequence file. The path is relative to the project folder.
         -d    | --database    (Required)     Name of the database for HHBlits.
                                              Ex: UniRef30_2020_06
                                              If your path is '/path/to/Uniclust/UniRef30_2020_03_a3m.ffdata'
-                                             provide: -d UniRef30_2020_03
+					     please provide: -d UniRef30_2020_03
         -o    | --outdir      (Required)     Path to the output directory.
+	-c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is all virtual cores available.
+	-m    | --memory      (Optionnal)    Maximum RAM to use in Gb (for HHblits). Default is all available.
         -h    | --help        (Optionnal)    Brings up this help
 EOF
 }
 
-# Parse command line arguments
+# Detect hardware based on OS
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    NB_CPUS=$(getconf _NPROCESSORS_ONLN)
+    MAX_MEMORY=$(free -g | awk '/^Mem:/{print $2}')
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    NB_CPUS=$(sysctl -n hw.ncpu)
+    MAX_MEMORY=$(expr $(sysctl -n hw.memsize) / $((1024**3)))
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+    NB_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
+    MAX_MEMORY=4
+fi
 
+# Parse command line arguments
 if [[ $# -ne 6 && $1 != "-h" && $1 != "--help" ]]; then
+	if [[ $# -ne 8 || $# -ne 10 &&  ]]
     printf "\n\nPlease provide all 3 required arguments.\n\n"
     usage
     exit
@@ -36,6 +50,14 @@ while [ "$1" != "" ]; do
             shift
             OUTDIR=$1
         ;;
+        -c | --cpus )
+            shift
+            NB_CPUS=$1
+        ;;
+        -m | --memory )
+            shift
+            MAX_MEMORY=$1
+        ;;
         -h | --help )
             usage
             exit
@@ -48,7 +70,7 @@ done
 
 # Check for valid sequence input
 if [ ! -f /project/$SEQ ]; then
-    printf "\nInput sequence is required, provide it with the flag: -i sequence.fasta\n\n"
+    printf "\nA valid input sequence file is required, provide it with the flag: -i sequence.fasta\nMake sure the path to the file is relative to your project folder.\n\n"
     exit
 fi
 
@@ -63,6 +85,14 @@ fi
 if [ ! -d /project/$OUTDIR ]; then
     printf "\n$OUTDIR does not exist, please provide a right output directory.\n\n"
     exit
+fi
+
+if [[ ! $NB_CPUS =~ ^[0-9]+$ ]]; then
+    printf "\nThe number of CPUs argument should be an integer.\n\n"
+fi
+
+if [[ ! $MAX_MEMORY =~ ^[0-9]+$ ]]; then
+    printf "\nThe memory argument should be an integer.\n\n"
 fi
 
 # Create a directory for the job output
@@ -97,7 +127,7 @@ export WINDOW=15
 ### Step 1. Create pssm data.
 ### HHblits is time consuming, probably remove the -realign_old_hits option. Probably decrease -max_filt and -realign_max.
 printf "Run HHblits ... "
-$HHBLITS -cpu 2 -maxmem 4 -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
+$HHBLITS -cpu $NB_CPUS -maxmem $MAX_MEMORY -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
 printf "done\n"
 
 printf "Run HHfilter ... "
