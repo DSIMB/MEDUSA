@@ -97,7 +97,7 @@ export WINDOW=15
 ### Step 1. Create pssm data.
 ### HHblits is time consuming, probably remove the -realign_old_hits option. Probably decrease -max_filt and -realign_max.
 printf "Run HHblits ... "
-$HHBLITS -cpu 32 -maxmem 60 -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
+$HHBLITS -cpu 2 -maxmem 4 -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
 printf "done\n"
 
 printf "Run HHfilter ... "
