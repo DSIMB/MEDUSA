@@ -82,10 +82,12 @@ fi
 
 if [[ ! $NB_CPUS =~ ^[0-9]+$ ]]; then
     printf "\nThe number of CPUs argument should be an integer.\n\n"
+    exit
 fi
 
 if [[ ! $MAX_MEMORY =~ ^[0-9]+$ ]]; then
     printf "\nThe memory argument should be an integer.\n\n"
+    exit
 fi
 
 # Create a directory for the job output
