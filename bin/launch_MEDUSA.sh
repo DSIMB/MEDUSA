@@ -19,10 +19,10 @@ EOF
 # Detect hardware based on OS
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     NB_CPUS=$(getconf _NPROCESSORS_ONLN)
-    MAX_MEMORY=$(free -g | awk '/^Mem:/{print $2}')
+    MAX_MEMORY=$(expr $(free -g | awk '/^Mem:/{print $2}') - 2)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     NB_CPUS=$(sysctl -n hw.ncpu)
-    MAX_MEMORY=$(expr $(sysctl -n hw.memsize) / $((1024**3)))
+    MAX_MEMORY=$(expr $(sysctl -n hw.memsize) / $((1024**3)) - 2 )
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     NB_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
     MAX_MEMORY=4
