@@ -42,6 +42,18 @@ $ git clone https://www.dsimb.inserm.fr/git/gabrielctn/medusa.git
 $ cd medusa
 ```
 
+### Database
+
+HHblits requires a sequence database e.g. uniref30.  
+If you don't have a sequence database follow the steps explained on HHblits [extensive user-guide](https://github.com/soedinglab/hh-suite/wiki#hh-suite-databases).  
+
+**TL;DR**:  
+1. Download the [latest release](http://wwwuser.gwdg.de/~compbiol/uniclust/current_release/) of database from the HHblits repository into an empty directory using command:  
+`wget http://wwwuser.gwdg.de/~compbiol/uniclust/[date]]/UniRef[date]_hhsuite.tar.gz`
+
+2. Extract the files using command:  
+`tar xzvf UniRef[date]_hhsuite.tar.gz`
+
 ### Build and run the Docker container
 
 The container is based on the image [tensorflow/tensorflow:2.3.0](https://hub.docker.com/layers/tensorflow/tensorflow/2.3.0/images/sha256-7bc36fe0ca1a051a808122e87f5438614b371263515df4794abef9a78440af8b?context=explore)
