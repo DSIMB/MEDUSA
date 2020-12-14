@@ -83,12 +83,14 @@ or
 $ docker run medusa --help
 
 Usage:
-        -i    | --seq         (Required)     Input Fasta sequence (file)
+        -i    | --seq         (Required)     Path to input Fasta sequence file. The path is relative to the project folder.
         -d    | --database    (Required)     Name of the database for HHBlits.
                                              Ex: UniRef30_2020_06
                                              If your path is '/path/to/Uniclust/UniRef30_2020_03_a3m.ffdata'
-                                             provide: -d UniRef30_2020_03
+                                             please provide: -d UniRef30_2020_03
         -o    | --outdir      (Required)     Path to the output directory.
+        -c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is 2. Set to 0 for all.
+        -m    | --memory      (Optionnal)    Maximum RAM to use in Gb (for HHblits). Default is 3. Set to 0 for all.
         -h    | --help        (Optionnal)    Brings up this help
 ```
 
