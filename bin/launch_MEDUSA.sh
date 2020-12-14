@@ -8,25 +8,30 @@ Usage:
         -d    | --database    (Required)     Name of the database for HHBlits.
                                              Ex: UniRef30_2020_06
                                              If your path is '/path/to/Uniclust/UniRef30_2020_03_a3m.ffdata'
-					     please provide: -d UniRef30_2020_03
+                                             please provide: -d UniRef30_2020_03
         -o    | --outdir      (Required)     Path to the output directory.
-	-c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is all virtual cores available.
-	-m    | --memory      (Optionnal)    Maximum RAM to use in Gb (for HHblits). Default is all available.
+        -c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is 2. Set to 0 for all.
+        -m    | --memory      (Optionnal)    Maximum RAM to use in Gb (for HHblits). Default is 3. Set to 0 for all.
         -h    | --help        (Optionnal)    Brings up this help
 EOF
 }
 
-# Detect hardware based on OS
+# Detect maximum hardware ressources based on OS
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    NB_CPUS=$(getconf _NPROCESSORS_ONLN)
+    MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
     MAX_MEMORY=$(expr $(free -g | awk '/^Mem:/{print $2}') - 2)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    NB_CPUS=$(sysctl -n hw.ncpu)
+    MAX_CPUS=$(sysctl -n hw.ncpu)
     MAX_MEMORY=$(expr $(sysctl -n hw.memsize) / $((1024**3)) - 2 )
 elif [[ "$OSTYPE" == "cygwin" ]]; then
-    NB_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
-    MAX_MEMORY=4
+    MAX_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
+    MAX_MEMORY=3
 fi
+
+# Set default resources based on HHblits defaults
+CPUS=2
+MEMORY=3
+
 
 # Parse command line arguments
 while [ "$1" != "" ]; do
@@ -45,11 +50,11 @@ while [ "$1" != "" ]; do
         ;;
         -c | --cpus )
             shift
-            NB_CPUS=$1
+            CPUS=$1
         ;;
         -m | --memory )
             shift
-            MAX_MEMORY=$1
+            MEMORY=$1
         ;;
         -h | --help )
             usage
@@ -80,37 +85,45 @@ if [ ! -d /project/$OUTDIR ]; then
     exit
 fi
 
-if [[ ! $NB_CPUS =~ ^[0-9]+$ ]]; then
-    printf "\nThe number of CPUs argument should be an integer.\n\n"
+# Check for valid ressources args (integers)
+if [[ ! $CPUS =~ ^[0-9]+$ || $CPUS -gt $MAX_CPUS || $CPUS -lt 1 ]]; then
+    printf "\nThe number of CPUs argument should be an integer 1 >= cpus >= $MAX_CPUS.\n\n"
     exit
+elif [[ $CPUS -eq 0 ]]; then
+    $CPUS=$MAX_CPUS
 fi
 
-if [[ ! $MAX_MEMORY =~ ^[0-9]+$ ]]; then
-    printf "\nThe memory argument should be an integer.\n\n"
+if [[ ! $MEMORY =~ ^[0-9]+$ || $MEMORY -gt $MAX_MEMORY || $MEMORY -lt 3 ]]; then
+    printf "\nThe memory argument should be an integer 3 >= memory >= $MAX_MEMORY.\n\n"
     exit
+elif [[ $MEMORY -eq 0 ]]; then
+    $MEMORY=$MAX_MEMORY
 fi
+
+
+
 
 # Create a directory for the job output
-export JOBDIR=$(mktemp -d -t MEDUSA.XXXX --suffix=-$(date +%Y%m%d%H%M%S) -p /project/$OUTDIR)
-export ORIGINAL_OUTDIR_NAME=$OUTDIR/`basename $JOBDIR`
+JOBDIR=$(mktemp -d -t MEDUSA.XXXX --suffix=-$(date +%Y%m%d%H%M%S) -p /project/$OUTDIR)
+ORIGINAL_OUTDIR_NAME=$OUTDIR/`basename $JOBDIR`
 
 # Set global paths
 
 # The project is mounted as docker bind volume 
 # into /project directory in the docker container
-export PROJECT=/project
-export HHSUITE=$PROJECT/hh-suite
-export HHBLITS=$HHSUITE/bin/hhblits
-export HHFILTER=$HHSUITE/bin/hhfilter
+PROJECT=/project
+HHSUITE=$PROJECT/hh-suite
+HHBLITS=$HHSUITE/bin/hhblits
+HHFILTER=$HHSUITE/bin/hhfilter
 # path to database is a mounted volume to /database when docker is launched
 # the name of the database is given in command line argument
-export DBHHBLITS=/database/$DATABASE
-export OUTDIR=$JOBDIR
-export SEQ=$PROJECT/$SEQ
-export SCRIPTS=$PROJECT/scripts
-export DATA=$PROJECT/data
-export MODELS=$PROJECT/models
-export WINDOW=15
+DBHHBLITS=/database/$DATABASE
+OUTDIR=$JOBDIR
+SEQ=$PROJECT/$SEQ
+SCRIPTS=$PROJECT/scripts
+DATA=$PROJECT/data
+MODELS=$PROJECT/models
+WINDOW=15
 
 
 
@@ -122,7 +135,7 @@ export WINDOW=15
 ### Step 1. Create pssm data.
 ### HHblits is time consuming, probably remove the -realign_old_hits option. Probably decrease -max_filt and -realign_max.
 printf "Run HHblits ... "
-$HHBLITS -cpu $NB_CPUS -maxmem $MAX_MEMORY -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
+$HHBLITS -cpu $CPUS -maxmem $MEMORY -maxfilt 10000 -diff inf -B 10000 -Z 10000 -e 0.0001 -cov 75 -realign_old_hits -realign_max 10000 -n 3 -i $SEQ -d $DBHHBLITS -oa3m $OUTDIR/job.a3m -o $OUTDIR/job.hhr 1>/dev/null 2> $OUTDIR/log_hhblits
 printf "done\n"
 
 printf "Run HHfilter ... "
