@@ -67,12 +67,12 @@ $ docker run -it --rm \
     -v /path/to/database:/database:ro \ # Bind mount as read-only the database for HHblits
     -v $(pwd):/project \ # Bind mount the project's folder
     medusa \ # The name of the container we launch
-    -i sequence.fasta \ # Fasta file containing the target sequence
+    -i data/sequence.fasta \ # Fasta file containing the target sequence
     -d uniclust30_2016_09 \ # Name of the database for HHblits (c.f --help for more details)
     -o ./output_dir # Directory which will contain results
 
 # One-liner, for convenience
-$ docker run -it --user "$(id -u):$(id -g)" -v /path/to/database:/database:ro -v $(pwd):/project medusa -i sequence.fasta -d uniclust30_2016_09 -o output_dir
+$ docker run -it --user "$(id -u):$(id -g)" -v /path/to/database:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o output_dir
 ```
 
 ### Help
@@ -95,7 +95,7 @@ Usage:
 ### Example
 
 ```bash
-$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project medusa -i test.seq.fasta -d uniclust30_2016_09 -o ./outdir
+$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project medusa -i data/test.seq.fasta -d uniclust30_2016_09 -o ./outdir
 Run HHblits ... done
 Run HHfilter ... done
 Reformat ... done
