@@ -28,7 +28,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     AVAIL_MEMORY=$(($INACTIVE_BLOCKS*4096/1073741824))
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     MAX_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
-    MAX_MEMORY=3
+    AVAIL_MEMORY=3
 fi
 
 # Set default resources based on HHblits defaults
@@ -120,22 +120,33 @@ if [ ! -d /project/$OUTDIR ]; then
 fi
 
 # Check for valid ressources args (integers)
-if [[ ! $CPUS =~ ^[0-9]+$ || $CPUS -gt $MAX_CPUS || $CPUS -lt 1 ]]; then
+if [[ ! $CPUS =~ ^[0-9]+$ || $CPUS -gt $MAX_CPUS ]]; then
     printf "\nThe number of CPUs argument should be an integer 1 >= cpus >= $MAX_CPUS.\n\n"
     exit
 elif [[ $CPUS -eq 0 ]]; then
-    $CPUS=$MAX_CPUS
+    CPUS=$MAX_CPUS
 fi
 
-if [[ ! $MEMORY =~ ^[0-9]+$ || $MEMORY -gt $MAX_MEMORY || $MEMORY -lt 3 ]]; then
+if [[ $AVAIL_MEMORY -lt 3 ]]; then
+    printf "\nOnly $AVAIL_MEMORY Gb of RAM is available.\nHHblits recommands at least 3 GB of memory, the program might not run well.\n\n"
+elif [[ $MEMORY -lt 3 && $AVAIL_MEMORY -gt 3 ]]; then
+    printf "\nYou ask for $MEMORY Gb of RAM."
+    printf "\nHHblits recommands at least 3 GB of memory, the program might not run well."
+    printf "\nYou have $AVAIL_MEMORY GB available so we will use 3 Gb instead.\n\n"
+    MEMORY=3
+elif [[ $MEMORY -lt 3 ]]; then
+    printf "\nHHblits recommands at least 3 GB of memory, the program might not run well.\nYou have $AVAIL_MEMORY GB available, consider increasing the -m argument value.\n\n"
+elif [[ ! $MEMORY =~ ^[0-9]+$ ]]; then
     printf "\nThe memory argument should be an integer 3 >= memory >= $AVAIL_MEMORY.\n\n"
     exit
+elif [[ $MEMORY -gt $AVAIL_MEMORY ]]; then
+    printf "\nOnly $AVAIL_MEMORY GB memory available, you asked for $MEMORY GB.\n\n"
+    exit
 elif [[ $MEMORY -eq 0 ]]; then
-    $MEMORY=$AVAIL_MEMORY
+    MEMORY=$AVAIL_MEMORY
 fi
 
-
-
+printf "Using:\n  $MEMORY Gb max. of RAM\n  $CPUS cpus\n\n"
 
 # Create a directory for the job output
 JOBDIR=$(mktemp -d -t MEDUSA.XXXX --suffix=-$(date +%Y%m%d%H%M%S) -p /project/$OUTDIR)
