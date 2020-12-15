@@ -107,7 +107,7 @@ fi
 
 # Check if database is accessible
 if [ ! -f /database/$DATABASE"_a3m.ffindex" ]; then
-    printf "\n The database $DATABASE seem unusable, please link the right database."
+    printf "\nThe database $DATABASE seem unusable, please link the right database."
     printf "\nIf your path is '/path/to/database/UniRef30_2020_03_a3m.ffdata' provide: -d UniRef30_2020_03\n\n"
     exit
 fi
