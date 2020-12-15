@@ -10,7 +10,7 @@ Usage:
                                              If your path is '/path/to/Uniclust/UniRef30_2020_03_a3m.ffdata'
                                              please provide: -d UniRef30_2020_03
         -o    | --outdir      (Required)     Path to the output directory.
-        -c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is 2. Set to 0 for all.
+        -c    | --cpus        (Optionnal)    Number of CPUs to use (for HHblits). Default is 2. Set to 0 for all available memory.
         -m    | --memory      (Optionnal)    Maximum RAM to use in Gb (for HHblits). Default is 3. Set to 0 for all.
         -h    | --help        (Optionnal)    Brings up this help
 EOF
@@ -22,7 +22,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     MAX_MEMORY=$(expr $(free -g | awk '/^Mem:/{print $2}') - 2)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     MAX_CPUS=$(sysctl -n hw.ncpu)
-    MAX_MEMORY=$(expr $(sysctl -n hw.memsize) / $((1024**3)) - 2 )
+    # get available memory (inactive RAM) in GB
+    INACTIVE_BLOCKS=$(vm_stat | grep inactive | awk '{ print $3 }' | sed 's/\.//')
+    AVAIL_MEMORY=$(($INACTIVE_BLOCKS*4096/1073741824))
 elif [[ "$OSTYPE" == "cygwin" ]]; then
     MAX_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
     MAX_MEMORY=3
@@ -70,6 +72,37 @@ done
 if [ ! -f /project/$SEQ ]; then
     printf "\nA valid input sequence file is required, provide it with the flag: -i sequence.fasta\nMake sure the path to the file is relative to your project folder.\n\n"
     exit
+elif [ $(grep -c "^>" /project/$SEQ) -gt 1 ]; then
+    printf "\nPlease provide only one FASTA sequence.\n\n"
+    exit
+elif [ $(grep -c "^>" /project/$SEQ) -eq 0 ]; then
+    printf "\nPlease provide at least one FASTA sequence.\n\n"
+    exit
+fi
+
+
+TMP_SEQ=/tmp/seq.fasta
+# Convert multiline fasta to single line
+sed ':a;N;/^>/M!s/\n//;ta;P;D' < /project/$SEQ > $TMP_SEQ
+# Extract only sequence without header (and trim whitespaces on extremities)
+SEQ=$(sed ':a;N;/^>/M!s/\n//;ta;P;D' < /project/$SEQ | tail -1 | xargs)
+printf "\nInput sequence:\n$SEQ\n\n"
+# Check if sequence contains whitespaces
+if [[ $SEQ =~ .*[[:space:]]+.* ]]; then
+    printf "\nThe sequence contains whitespaces, please provide a valid sequence.\n\n"
+    exit
+# Check unsupported amino acids
+elif [[ $SEQ =~ [UXBZ]+ ]]; then
+    printf "\nYour sequence contains unsupported amino acids (U, X, B or Z).\n\n"
+    exit
+# Check if sequence if a correct protein sequence
+elif [[ ! $SEQ =~ ^[ACDEFGHIKLMNPQRSTVWY]+$ ]]; then
+    printf "\nPlease provide a valid input protein FASTA sequence file.\n\n"
+    exit
+# Check if it is a DNA sequence
+elif [[ $SEQ =~ ^[atgcATGC]+$ ]]; then
+    printf "\nYour sequence looks like a DNA sequence.\nPlease provide a protein sequence.\n\n"
+    exit
 fi
 
 # Check if database is accessible
@@ -94,10 +127,10 @@ elif [[ $CPUS -eq 0 ]]; then
 fi
 
 if [[ ! $MEMORY =~ ^[0-9]+$ || $MEMORY -gt $MAX_MEMORY || $MEMORY -lt 3 ]]; then
-    printf "\nThe memory argument should be an integer 3 >= memory >= $MAX_MEMORY.\n\n"
+    printf "\nThe memory argument should be an integer 3 >= memory >= $AVAIL_MEMORY.\n\n"
     exit
 elif [[ $MEMORY -eq 0 ]]; then
-    $MEMORY=$MAX_MEMORY
+    $MEMORY=$AVAIL_MEMORY
 fi
 
 
@@ -109,7 +142,7 @@ ORIGINAL_OUTDIR_NAME=$OUTDIR/`basename $JOBDIR`
 
 # Set global paths
 
-# The project is mounted as docker bind volume 
+# The project is mounted as docker bind volume
 # into /project directory in the docker container
 PROJECT=/project
 HHSUITE=$PROJECT/hh-suite
@@ -119,7 +152,7 @@ HHFILTER=$HHSUITE/bin/hhfilter
 # the name of the database is given in command line argument
 DBHHBLITS=/database/$DATABASE
 OUTDIR=$JOBDIR
-SEQ=$PROJECT/$SEQ
+SEQ=$TMP_SEQ
 SCRIPTS=$PROJECT/scripts
 DATA=$PROJECT/data
 MODELS=$PROJECT/models
@@ -143,7 +176,7 @@ $HHFILTER -v 2 -id 99 -neff 20 -qsc -30 -cov 75 -i $OUTDIR/job.a3m -o $OUTDIR/jo
 printf "done\n"
 
 #perl $HHSUITE/scripts/reformat.pl -M -uc first a3m fas job\_filter.a3m pdb_mfasta/job.mfasta
-# without insertions in the first (query) sequence 
+# without insertions in the first (query) sequence
 printf "Reformat ... "
 perl $HHSUITE/scripts/reformat.pl -r -M -uc first a3m fas $OUTDIR/job\_filter.a3m $OUTDIR/job.mfasta_woi 1>/dev/null 2>&1
 printf "done\n"
@@ -169,7 +202,7 @@ printf "done\n"
 
 ### Step 5. Merge all features to one vector
 printf "Merge vectors ... "
-python3 $SCRIPTS/create_vector_features.py -i $OUTDIR/job -o $OUTDIR/job.merged 
+python3 $SCRIPTS/create_vector_features.py -i $OUTDIR/job -o $OUTDIR/job.merged
 printf "done\n"
 
 
@@ -186,4 +219,3 @@ cp $OUTDIR/job* $OUTDIR/log_hhblits $OUTDIR/logs/
 tar -czf $OUTDIR/medusa_job\_results.tar.gz $OUTDIR/prediction/*.csv $OUTDIR/logs 1>/dev/null 2>&1
 rm $OUTDIR/job* $OUTDIR/log_hhblits
 printf "Results can be found in $ORIGINAL_OUTDIR_NAME\n\n"
-
