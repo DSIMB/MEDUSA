@@ -19,7 +19,8 @@ EOF
 # Detect maximum hardware ressources based on OS
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
-    MAX_MEMORY=$(expr $(free -g | awk '/^Mem:/{print $2}') - 2)
+    # get available memory (inactive RAM) in GB
+    AVAIL_MEMORY=$(awk '/MemFree/ { printf "%.0f \n", $2/1024/1024 }' /proc/meminfo)
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     MAX_CPUS=$(sysctl -n hw.ncpu)
     # get available memory (inactive RAM) in GB
