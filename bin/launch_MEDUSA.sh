@@ -127,22 +127,28 @@ elif [[ $CPUS -eq 0 ]]; then
     CPUS=$MAX_CPUS
 fi
 
-if [[ $AVAIL_MEMORY -lt 3 ]]; then
-    printf "\nOnly $AVAIL_MEMORY Gb of RAM is available.\nHHblits recommands at least 3 GB of memory, the program might not run well.\n\n"
+if [[ $MEMORY -eq 0 ]]; then
+    MEMORY=$AVAIL_MEMORY
+elif [[ $AVAIL_MEMORY -lt 3 ]]; then
+    printf "\nOnly $AVAIL_MEMORY Gb of RAM is available.\nHHblits recommands at least 3 GB of memory, the program might not run well."
+    printf "\nSetting minimum 1 Gb of memory.\n\n"
 elif [[ $MEMORY -lt 3 && $AVAIL_MEMORY -gt 3 ]]; then
-    printf "\nYou ask for $MEMORY Gb of RAM."
+    printf "\nYou asked for $MEMORY Gb of RAM."
     printf "\nHHblits recommands at least 3 GB of memory, the program might not run well."
-    printf "\nYou have $AVAIL_MEMORY GB available so we will use 3 Gb instead.\n\n"
+    printf "\nYou have $AVAIL_MEMORY GB available so we will use default 3 Gb instead.\n\n"
     MEMORY=3
-elif [[ $MEMORY -lt 3 ]]; then
-    printf "\nHHblits recommands at least 3 GB of memory, the program might not run well.\nYou have $AVAIL_MEMORY GB available, consider increasing the -m argument value.\n\n"
+elif [[ $MEMORY -lt 3 && $AVAIL_MEMORY -lt 3 && $MEMORY -lt $AVAIL_MEMORY ]]; then
+    printf "\nYou asked for $MEMORY Gb of RAM."
+    printf "\nYou have $AVAIL_MEMORY GB available."
+    printf "\nSetting minimum value of 1 Gb instead."
+    printf "\nHHblits recommands at least 3 GB of memory, the program might not run well.\n\n"
+    MEMORY=1
 elif [[ ! $MEMORY =~ ^[0-9]+$ ]]; then
     printf "\nThe memory argument should be an integer 3 >= memory >= $AVAIL_MEMORY.\n\n"
     exit
 elif [[ $MEMORY -gt $AVAIL_MEMORY ]]; then
-    printf "\nOnly $AVAIL_MEMORY GB memory available, you asked for $MEMORY GB.\n\n"
-    exit
-elif [[ $MEMORY -eq 0 ]]; then
+    printf "\nOnly $AVAIL_MEMORY GB memory available, you asked for $MEMORY GB."
+    printf "\nUsing $AVAIL_MEMORY GB memory instead.\n\n"
     MEMORY=$AVAIL_MEMORY
 fi
 
