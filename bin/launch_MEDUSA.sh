@@ -17,19 +17,9 @@ EOF
 }
 
 # Detect maximum hardware ressources based on OS
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
-    # get available memory (inactive RAM) in GB
-    AVAIL_MEMORY=$(awk '/MemFree/ { printf "%.0f \n", $2/1024/1024 }' /proc/meminfo)
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    MAX_CPUS=$(sysctl -n hw.ncpu)
-    # get available memory (inactive RAM) in GB
-    INACTIVE_BLOCKS=$(vm_stat | grep inactive | awk '{ print $3 }' | sed 's/\.//')
-    AVAIL_MEMORY=$(($INACTIVE_BLOCKS*4096/1073741824))
-elif [[ "$OSTYPE" == "cygwin" ]]; then
-    MAX_CPUS=$(echo %NUMBER_OF_PROCESSORS%)
-    AVAIL_MEMORY=3
-fi
+MAX_CPUS=$(getconf _NPROCESSORS_ONLN)
+# get available memory (inactive RAM) in GB
+AVAIL_MEMORY=$(awk '/MemFree/ { printf "%.0f \n", $2/1024/1024 }' /proc/meminfo)
 
 # Set default resources based on HHblits defaults
 CPUS=2
@@ -127,11 +117,20 @@ elif [[ $CPUS -eq 0 ]]; then
     CPUS=$MAX_CPUS
 fi
 
-if [[ $MEMORY -eq 0 ]]; then
+if [[ ! $MEMORY =~ ^[0-9]+$ ]]; then
+    printf "\nThe memory argument should be an integer 3 >= memory >= $AVAIL_MEMORY.\n\n"
+    exit
+elif [[ $MEMORY -eq 0 ]]; then
     MEMORY=$AVAIL_MEMORY
 elif [[ $AVAIL_MEMORY -lt 3 ]]; then
     printf "\nOnly $AVAIL_MEMORY Gb of RAM is available.\nHHblits recommands at least 3 GB of memory, the program might not run well."
-    printf "\nSetting minimum 1 Gb of memory.\n\n"
+    printf "\nSetting minimum 1 Gb of memory.\n"
+    if [[ "$OSTYPE" == "darwin"* ]]; then 
+        printf "\nPlease consider increasing the runtime memory allocated to the Docker Desktop program on your Mac.\n"
+    elif [[ "$OSTYPE" == "cygwin" ]]; then
+        printf "\nPlease consider increasing the runtime memory allocated to the Docker Desktop program on your Windows PC.\n"
+    fi
+    printf "\n"
 elif [[ $MEMORY -lt 3 && $AVAIL_MEMORY -gt 3 ]]; then
     printf "\nYou asked for $MEMORY Gb of RAM."
     printf "\nHHblits recommands at least 3 GB of memory, the program might not run well."
@@ -143,9 +142,6 @@ elif [[ $MEMORY -lt 3 && $AVAIL_MEMORY -lt 3 && $MEMORY -lt $AVAIL_MEMORY ]]; th
     printf "\nSetting minimum value of 1 Gb instead."
     printf "\nHHblits recommands at least 3 GB of memory, the program might not run well.\n\n"
     MEMORY=1
-elif [[ ! $MEMORY =~ ^[0-9]+$ ]]; then
-    printf "\nThe memory argument should be an integer 3 >= memory >= $AVAIL_MEMORY.\n\n"
-    exit
 elif [[ $MEMORY -gt $AVAIL_MEMORY ]]; then
     printf "\nOnly $AVAIL_MEMORY GB memory available, you asked for $MEMORY GB."
     printf "\nUsing $AVAIL_MEMORY GB memory instead.\n\n"
