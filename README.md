@@ -54,14 +54,25 @@ If you don't have a sequence database follow the steps explained on HHblits [ext
 2. Extract the files using command:  
 `tar xzvf UniRef[date]_hhsuite.tar.gz`
 
-### Build and run the Docker container
 
-The container is based on the image [tensorflow/tensorflow:2.3.0](https://hub.docker.com/layers/tensorflow/tensorflow/2.3.0/images/sha256-7bc36fe0ca1a051a808122e87f5438614b371263515df4794abef9a78440af8b?context=explore)
+### Download the docker image  
+
+You can download the latest build of Medusa docker image (recommanded):  
+
+```
+$ docker pull dsimb/medusa
+```
+
+or build it yourself from the git repository:  
+
+```
+$ docker build -t medusa .
+```
+
+### Run the Docker container
 
 ```bash
-# Build the container and name (tag) it conveniently: medusa
-$ docker build -t medusa .
-# Run it. Change paths and names accordingly
+# Change paths and names accordingly
 $ docker run -it --rm \
     --user "$(id -u):$(id -g)" \ # Launch docker as user's id
     -v /path/to/database:/database:ro \ # Bind mount as read-only the database for HHblits
@@ -69,10 +80,10 @@ $ docker run -it --rm \
     medusa \ # The name of the container we launch
     -i data/sequence.fasta \ # Fasta file containing the target sequence
     -d uniclust30_2016_09 \ # Name of the database for HHblits (c.f --help for more details)
-    -o ./output_dir # Directory which will contain results
+    -o ./results # Directory which will contain results
 
 # One-liner, for convenience
-$ docker run -it --user "$(id -u):$(id -g)" -v /path/to/database:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o output_dir
+$ docker run -it --user "$(id -u):$(id -g)" -v /path/to/database:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o results
 ```
 
 ### Help
@@ -97,7 +108,7 @@ Usage:
 ### Example
 
 ```bash
-$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project medusa -i data/test.seq.fasta -d uniclust30_2016_09 -o ./outdir
+$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o ./results -c 0 -m 0
 Run HHblits ... done
 Run HHfilter ... done
 Reformat ... done
@@ -107,8 +118,8 @@ Translate encodings into vectors ... done
 Merge vectors ... done
 Run predictions ... done
 
-Results can be found in ./outdir/MEDUSA.jy5J-20201208215144
+Results can be found in ./results/MEDUSA.jy5J-20201208215144
 
-$ ls ./outdir/MEDUSA.jy5J-2020120
+$ ls ./results/MEDUSA.jy5J-2020120
 logs  medusa_job_results.tar.gz  prediction
 ```
