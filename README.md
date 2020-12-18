@@ -57,7 +57,7 @@ If you don't have a sequence database follow the steps explained on HHblits [ext
 
 ### Download the docker image  
 
-You can download the latest build of Medusa docker image (recommanded):  
+You can download the latest build of Medusa docker image (recommended):  
 
 ```
 $ docker pull dsimb/medusa
