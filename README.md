@@ -69,29 +69,50 @@ or build it yourself from the git repository:
 $ docker build -t medusa .
 ```
 
-### Run the Docker container
+### Run the Docker container  
+  
+**IMPORTANT**  
+  
+| Option | Adapt to your local paths (no trailing slash '/') |   | Do not modify |
+|--------|---------------------------------------------------|---|---------------|
+| -v     | /path/to/database                                 | : | /database     |
+| -v     | $(pwd)                                            | : | /project      |
+
 
 ```bash
 # Change paths and names accordingly
-$ docker run -it --rm \
-    --user "$(id -u):$(id -g)" \ # Launch docker as user's id
-    -v /path/to/database:/database:ro \ # Bind mount as read-only the database for HHblits
-    -v $(pwd):/project \ # Bind mount the project's folder
-    medusa \ # The name of the container we launch
-    -i data/sequence.fasta \ # Fasta file containing the target sequence
-    -d uniclust30_2016_09 \ # Name of the database for HHblits (c.f --help for more details)
-    -o ./results # Directory which will contain results
+PATH_DATABASE=/path/to/database
+# Path to MEDUSA git repository
+PATH_MEDUSA=$(pwd) 
 
-# One-liner, for convenience
-$ docker run -it --user "$(id -u):$(id -g)" -v /path/to/database:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o results
+$ docker run -it --rm \
+    # Launch docker as user's id
+    --user "$(id -u):$(id -g)" \  
+    # Bind mount as read-only the database for HHblits (ex: /home/gabriel/UniRef)
+    -v ${PATH_DATABASE}:/database:ro \  
+    # Bind mount the project's folder
+    -v ${PATH_MEDUSA}:/project \  
+    # The name of the container we launch
+    medusa \  
+    # Fasta file containing the target sequence (path relative to project)
+    -i ./data/sequence.fasta \  
+    # Name of the database prefix for HHblits (c.f --help for more details)
+    # If database file is "uniclust30_2016_09_a3m_ffindex", set option to prefix "uniclust30_2016_09"
+    -d uniclust30_2016_09 \  
+    # Directory which will contain results (path relative to project)
+    -o ./results  
+```
+One-liner, for convenience
+```bash
+$ docker run -it --user "$(id -u):$(id -g)" -v ${PATH_DATABASE}:/database:ro -v ${PATH_MEDUSA}:/project medusa -i ./data/sequence.fasta -d uniclust30_2016_09 -o ./results
 ```
 
 ### Help
 
 ```bash
-$ docker run medusa
+$ docker run dsimb/medusa
 or
-$ docker run medusa --help
+$ docker run dsimb/medusa --help
 
 Usage:
         -i    | --seq         (Required)     Path to input Fasta sequence file. The path is relative to the project folder.
@@ -108,7 +129,7 @@ Usage:
 ### Example
 
 ```bash
-$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project medusa -i data/sequence.fasta -d uniclust30_2016_09 -o ./results -c 0 -m 0
+$ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project dsimb/medusa -i ./data/sequence.fasta -d uniclust30_2016_09 -o ./results -c 0 -m 0
 Run HHblits ... done
 Run HHfilter ... done
 Reformat ... done
