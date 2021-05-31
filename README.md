@@ -97,7 +97,7 @@ $ docker run -it --rm \
     # Fasta file containing the target sequence (path relative to project)
     -i ./data/sequence.fasta \  
     # Name of the database prefix for HHblits (c.f --help for more details)
-    # If database file is "uniclust30_2016_09_a3m_ffindex", set option to prefix "uniclust30_2016_09"
+    # If database file is "uniclust30_2016_09_a3m.ffindex", set option to prefix "uniclust30_2016_09"
     -d uniclust30_2016_09 \  
     # Directory which will contain results (path relative to project)
     -o ./results  
