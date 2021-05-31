@@ -1,6 +1,10 @@
 # MEDUSA
 
-A Deep Learning based protein flexibility prediction tool.
+[![Docker Pulls](https://img.shields.io/docker/pulls/dsimb/medusa.svg)](https://hub.docker.com/r/dsimb/medusa)
+
+(C) Yann Vander Meersche, Gabriel Cretin, Alexandre de Brevers, Jean-Christophe Gelly, Tatiana Galochkina  
+
+**A Deep Learning based protein flexibility prediction tool.**
 
 
 ## Abstract
@@ -144,3 +148,11 @@ Results can be found in ./results/MEDUSA.jy5J-20201208215144
 $ ls ./results/MEDUSA.jy5J-2020120
 logs  medusa_job_results.tar.gz  prediction
 ```
+
+### Reference  
+
+Vander Meersche, Y., Cretin, G., de Brevern, A. G., Gelly, J. C., & Galochkina, T. (2021). MEDUSA: Prediction of protein flexibility from sequence. Journal of Molecular Biology, 166882. https://doi.org/10.1016/j.jmb.2021.166882
+
+### Issues  
+
+If you encounter any issue, do not hesitate to open an issue.  
