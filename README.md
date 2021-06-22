@@ -18,7 +18,7 @@ Information on the protein flexibility is essential to understand crucial molecu
 **Linux**
 
 Docker provides a convenient script to install itself (Linux: Ubuntu, Debian|Raspbian, CentOS|RHEL)
-```bash
+```term
 $ curl -fsSL https://get.docker.com -o get-docker.sh
 $ sudo sh get-docker.sh
 
@@ -41,7 +41,7 @@ $ su - $USER
 
 ### Download this repository  
 
-```bash
+```term
 $ git clone https://www.dsimb.inserm.fr/git/gabrielctn/medusa.git
 $ cd medusa
 ```
@@ -83,7 +83,7 @@ $ docker build -t medusa .
 | -v     | $(pwd)                                            | : | /project      |
 
 
-```bash
+```term
 # Change paths and names accordingly
 PATH_DATABASE=/path/to/database
 # Path to MEDUSA git repository
@@ -107,13 +107,36 @@ $ docker run -it --rm \
     -o ./results  
 ```
 One-liner, for convenience
-```bash
+```term
 $ docker run -it --user "$(id -u):$(id -g)" -v ${PATH_DATABASE}:/database:ro -v ${PATH_MEDUSA}:/project medusa -i ./data/sequence.fasta -d uniclust30_2016_09 -o ./results
 ```
 
+### Example for running batch prediction  
+
+If you have a multifasta file and you wish to run MEDUSA protein flexibility prediction for all of your sequences,
+you can follow these few steps to split your multifasta file into single fasta files and run the docker container
+for each of them individually.  
+
+```term
+$ ls
+multi.fasta
+$ cat multi.fasta
+>SEQUENCE_1
+MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEG
+LVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHK
+IPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTL
+>SEQUENCE_2
+SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQI
+ATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH
+$ awk '/^>/{s=++d".fasta"} {print > s}' multi.fasta
+1.fasta 2.fasta
+$ for seq in ./*.fasta; do docker run -it --user "$(id -u):$(id -g)" -v ${PATH_DATABASE}:/database:ro -v ${PATH_MEDUSA}:/project medusa -i ./$seq -d uniclust30_2016_09 -o ./results -c 0 -o 0; done
+```
+
+
 ### Help
 
-```bash
+```term
 $ docker run dsimb/medusa
 or
 $ docker run dsimb/medusa --help
@@ -132,7 +155,7 @@ Usage:
 
 ### Example
 
-```bash
+```term
 $ docker run -it --user "$(id -u):$(id -g)" -v /home/cretin/uniclust:/database:ro -v $(pwd):/project dsimb/medusa -i ./data/sequence.fasta -d uniclust30_2016_09 -o ./results -c 0 -m 0
 Run HHblits ... done
 Run HHfilter ... done
