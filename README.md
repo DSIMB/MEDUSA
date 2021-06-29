@@ -2,7 +2,7 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/dsimb/medusa.svg)](https://hub.docker.com/r/dsimb/medusa)
 
-(C) Yann Vander Meersche, Gabriel Cretin, Alexandre de Brevers, Jean-Christophe Gelly, Tatiana Galochkina  
+(C) Yann Vander Meersche, Gabriel Cretin, Alexandre de Brevern, Jean-Christophe Gelly, Tatiana Galochkina  
 
 **A Deep Learning based protein flexibility prediction tool.**
 
