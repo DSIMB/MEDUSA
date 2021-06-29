@@ -42,7 +42,7 @@ $ su - $USER
 ### Download this repository  
 
 ```term
-$ git clone https://github.com/DSIMB/medusa
+$ git clone https://github.com/DSIMB/medusa.git
 $ cd medusa
 ```
 
