@@ -1,9 +1,10 @@
 # set base image
 FROM tensorflow/tensorflow:2.3.0
 
-#RUN apt-get update && apt-get install --no-recommands -y \
-#   package-to-install \
-# && rm -rf /var/lib/apt/lists/*
+LABEL program="MEDUSA"
+LABEL description="A Deep Learning based protein flexibility prediction tool."
+LABEL version="1.1"
+LABEL maintainer="gabriel.cretin@u-paris.fr"
 
 # set the working directory in the container
 WORKDIR /MEDUSA
