@@ -4,18 +4,18 @@ DOCKSTRINGS FFS
 """
 
 
-import os 
-import sys 
-import math 
-import datetime 
-import argparse 
+import os
+import sys
+import math
+import datetime
+import argparse
 import h5py
-import pandas as pd 
-import numpy as np 
+import pandas as pd
+import numpy as np
 import functools
 
 from tensorflow.keras.models import model_from_json
-from tensorflow.keras.utils import to_categorical 
+from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.optimizers import Adam
 
@@ -161,44 +161,41 @@ if __name__ == "__main__":
         y_pred = model_S.predict(x_test, verbose=0)
         y_pred_classes = np.argmax(y_pred, axis=1)
         prob_y_pred = np.amax(y_pred, axis=1)
-   
+
         # Create a dataframe from zipped list
-        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred))
-        df = pd.DataFrame(zippedList, columns = ["res", f"S", f"P_S"])
-        df.to_csv(os.path.join(OUTPUT, f"S_prediction.csv"), index=False, float_format="%.2f", sep="\t")
+        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred, y_pred[:, 0], y_pred[:, 1]))
+        df = pd.DataFrame(zippedList, columns = ["res", "S", "P_max", "P_0", "P_1"])
+        df.to_csv(os.path.join(OUTPUT, "S_prediction.csv"), index=False, float_format="%.2f", sep="\t")
 
 
     if "NS" in model_list:
         y_pred = model_NS.predict(x_test, verbose=0)
         y_pred_classes = np.argmax(y_pred, axis=1)
         prob_y_pred = np.amax(y_pred, axis=1)
-   
+
         # Create a dataframe from zipped list
-        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred))
-        df = pd.DataFrame(zippedList, columns = ["res", f"NS", f"P_NS"])
-        df.to_csv(os.path.join(OUTPUT, f"NS_prediction.csv"), index=False, float_format="%.2f", sep="\t")
+        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred, y_pred[:, 0], y_pred[:, 1]))
+        df = pd.DataFrame(zippedList, columns = ["res", "NS", "P_max", "P_0", "P_1"])
+        df.to_csv(os.path.join(OUTPUT, "NS_prediction.csv"), index=False, float_format="%.2f", sep="\t")
 
 
     if "3" in model_list:
         y_pred = model_3.predict(x_test, verbose=0)
         y_pred_classes = np.argmax(y_pred, axis=1)
         prob_y_pred = np.amax(y_pred, axis=1)
-   
+
         # Create a dataframe from zipped list
-        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred))
-        df = pd.DataFrame(zippedList, columns = ["res", f"pred_3", f"P_3"])
-        df.to_csv(os.path.join(OUTPUT, f"3_prediction.csv"), index=False, float_format="%.2f", sep="\t")
+        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred, y_pred[:, 0], y_pred[:, 1], y_pred[:, 2]))
+        df = pd.DataFrame(zippedList, columns = ["res", "pred_3", "P_max", "P_0", "P_1", "P_2"])
+        df.to_csv(os.path.join(OUTPUT, "3_prediction.csv"), index=False, float_format="%.2f", sep="\t")
 
 
     if "5" in model_list:
         y_pred = model_5.predict(x_test, verbose=0)
         y_pred_classes = np.argmax(y_pred, axis=1)
         prob_y_pred = np.amax(y_pred, axis=1)
-   
-        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred))
-        df = pd.DataFrame(zippedList, columns = ["res", f"pred_5", f"P_5"])
-        df.to_csv(os.path.join(OUTPUT, f"5_prediction.csv"), index=False, float_format="%.2f", sep="\t")
 
-
-
-
+        # Create a dataframe from zipped list
+        zippedList =  list(zip(seq_AA, y_pred_classes, prob_y_pred, y_pred[:, 0], y_pred[:, 1], y_pred[:, 2], y_pred[:, 3], y_pred[:, 4]))
+        df = pd.DataFrame(zippedList, columns = ["res", "pred_5", "P_max", "P_0", "P_1", "P_2", "P_3", "P_4"])
+        df.to_csv(os.path.join(OUTPUT, "5_prediction.csv"), index=False, float_format="%.2f", sep="\t")
