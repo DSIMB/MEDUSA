@@ -169,8 +169,19 @@ Run predictions ... done
 Results can be found in ./results/MEDUSA.jy5J-20201208215144
 
 $ ls ./results/MEDUSA.jy5J-2020120
-logs  medusa_job_results.tar.gz  prediction
+html logs  medusa_job_results.tar.gz  prediction
 ```
+
+### Vizualise results on the web
+
+MEDUSA automatically generates a web page looking just like the webserver, to vizualise local results with interactive plots and graphs.  
+This page can be found in the results directory:
+```
+$ ls ./results/MEDUSA.jy5J-2020120/html
+results.html
+```
+
+
 
 ### Reference  
 
