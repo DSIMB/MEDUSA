@@ -1,5 +1,6 @@
 # MEDUSA
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7041319.svg)](https://doi.org/10.5281/zenodo.7041319)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dsimb/medusa.svg)](https://hub.docker.com/r/dsimb/medusa)
 
 (C) Yann Vander Meersche, Gabriel Cretin, Alexandre de Brevern, Jean-Christophe Gelly, Tatiana Galochkina  
