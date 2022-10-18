@@ -182,7 +182,15 @@ $ ls ./results/MEDUSA.jy5J-2020120/html
 results.html
 ```
 
+To view it, start a small http server **at the root of the Git repository**:  
+```
+$ python3 -m http.server
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+```
 
+Open your brower at `http:localhost:8000`  
+Browse to the html file:  
+`http://localhost:8000/results/MEDUSA.jy5J-2020120/html/results.html` 
 
 ### Reference  
 
